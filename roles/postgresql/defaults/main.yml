@@ -1,0 +1,5 @@
+---
+db_name: ansibledb
+db_user: ansibleuser
+db_password: password123
+postgres_password: password123
