@@ -1,0 +1,65 @@
+---
+- hosts: webservers
+  become: true
+  tasks:
+    - name: Update package lists
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      become: true
+      apt:
+        name:
+          - git
+          - postgresql-client
+          - build-essential
+          - erlang-dev
+          - libssl-dev
+          - libncurses5-dev
+          - libwxgtk3.0-gtk3-dev
+          - libsctp-dev
+          - elixir
+        update_cache: yes
+        state: present
+
+    - name: Clone the project from Github
+      git:
+        repo: https://github.com/camberlucian/ansible_pd.git
+        dest: /home/ubuntu/AnsiblePhoenix
+      become_user: ubuntu
+
+    - name: Install Hex
+      command: mix local.hex --force
+      args:
+        chdir: /home/ubuntu/AnsiblePhoenix
+      become_user: ubuntu
+
+    - name: Install dependencies
+      command: mix deps.get --force --only prod -y
+      args:
+        chdir: /home/ubuntu/AnsiblePhoenix
+      become_user: ubuntu
+
+    - name: Compile the application
+      command: mix compile
+      args:
+        chdir: /home/ubuntu/AnsiblePhoenix
+      become_user: ubuntu
+
+    - name: Create the database
+      command: mix ecto.create
+      args:
+        chdir: /home/ubuntu/AnsiblePhoenix
+      become_user: ubuntu
+
+    - name: Migrate the database
+      command: mix ecto.migrate
+      args:
+        chdir: /home/ubuntu/AnsiblePhoenix
+      become_user: ubuntu
+
+    - name: Start the application
+      command: mix phx.server
+      args:
+        chdir: /home/ubuntu/AnsiblePhoenix
+      become_user: ubuntu
