@@ -6,12 +6,15 @@
       apt:
         update_cache: yes
 
+    - name: Install required tools
+      apt:
+        name: ["git", "curl"]
+    
     - name: Install required packages
       become: true
       apt:
         name:
           - git
-          - postgresql-client
           - build-essential
           - erlang-dev
           - libssl-dev
@@ -26,34 +29,35 @@
       git:
         repo: https://github.com/camberlucian/ansible_pd.git
         dest: /home/ubuntu/AnsiblePhoenix
+        force: yes
       become_user: ubuntu
 
+    - name: Clear build and deps
+      command: rm -rf deps _build 
+      args:
+        chdir: /home/ubuntu/AnsiblePhoenix
+      become_user: ubuntu
+    
     - name: Install Hex
       command: mix local.hex --force
       args:
         chdir: /home/ubuntu/AnsiblePhoenix
       become_user: ubuntu
 
+    - name: Install Rebar
+      command: mix local.rebar --force
+      args:
+        chdir: /home/ubuntu/AnsiblePhoenix
+      become_user: ubuntu
+
     - name: Install dependencies
-      command: mix deps.get --force --only prod -y
+      command: mix deps.get 
       args:
         chdir: /home/ubuntu/AnsiblePhoenix
       become_user: ubuntu
 
     - name: Compile the application
       command: mix compile
-      args:
-        chdir: /home/ubuntu/AnsiblePhoenix
-      become_user: ubuntu
-
-    - name: Create the database
-      command: mix ecto.create
-      args:
-        chdir: /home/ubuntu/AnsiblePhoenix
-      become_user: ubuntu
-
-    - name: Migrate the database
-      command: mix ecto.migrate
       args:
         chdir: /home/ubuntu/AnsiblePhoenix
       become_user: ubuntu
