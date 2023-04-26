@@ -50,6 +50,13 @@
         chdir: /home/ubuntu/AnsiblePhoenix
       become_user: ubuntu
 
+
+    - name: Install Erlang Xmerl
+      command: sudo apt-get install -y erlang-xmerl
+      args:
+        chdir: /home/ubuntu/AnsiblePhoenix
+      become_user: ubuntu
+
     - name: Install dependencies
       command: mix deps.get 
       args:
