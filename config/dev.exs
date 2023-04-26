@@ -1,29 +1,19 @@
 import Config
 
-# Configure your database
-config :ansible_phoenix, AnsiblePhoenix.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "ansible_phoenix_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
-
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with esbuild to bundle .js and .css sources.
-config :ansible_phoenix, AnsiblePhoenixWeb.Endpoint,
+config :ansible_pd, AnsiblePdWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}, port: 4000],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "HbL8JS1TvBv4Rl3TbzkvYMKcDdZvDN2wdPvwdbVUgppRchFgfXAV10FqZEsmKp1I",
+  secret_key_base: "SbqpKlK60ftPztTL6c6SHm93Z8COpKJpeT5sdooKiz8W9oN7krMKl1/Gu+sWQRSB",
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
@@ -54,13 +44,13 @@ config :ansible_phoenix, AnsiblePhoenixWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :ansible_phoenix, AnsiblePhoenixWeb.Endpoint,
+config :ansible_pd, AnsiblePdWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/ansible_phoenix_web/(live|views)/.*(ex)$",
-      ~r"lib/ansible_phoenix_web/templates/.*(eex)$"
+      ~r"lib/ansible_pd_web/(live|views)/.*(ex)$",
+      ~r"lib/ansible_pd_web/templates/.*(eex)$"
     ]
   ]
 

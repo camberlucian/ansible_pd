@@ -1,13 +1,13 @@
-defmodule AnsiblePhoenix.MixProject do
+defmodule AnsiblePd.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :ansible_phoenix,
+      app: :ansible_pd,
       version: "0.1.0",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: Mix.compilers(),
+      compilers: [:gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -19,7 +19,7 @@ defmodule AnsiblePhoenix.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {AnsiblePhoenix.Application, []},
+      mod: {AnsiblePd.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -34,9 +34,6 @@ defmodule AnsiblePhoenix.MixProject do
   defp deps do
     [
       {:phoenix, "~> 1.6.15"},
-      {:phoenix_ecto, "~> 4.4"},
-      {:ecto_sql, "~> 3.6"},
-      {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 0.17.5"},
@@ -60,10 +57,7 @@ defmodule AnsiblePhoenix.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      setup: ["deps.get"],
       "assets.deploy": ["esbuild default --minify", "phx.digest"]
     ]
   end

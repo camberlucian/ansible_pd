@@ -7,15 +7,12 @@
 # General application configuration
 import Config
 
-config :ansible_phoenix,
-  ecto_repos: [AnsiblePhoenix.Repo]
-
 # Configures the endpoint
-config :ansible_phoenix, AnsiblePhoenixWeb.Endpoint,
+config :ansible_pd, AnsiblePdWeb.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: AnsiblePhoenixWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: AnsiblePhoenix.PubSub,
-  live_view: [signing_salt: "6Dt/FeKG"]
+  render_errors: [view: AnsiblePdWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: AnsiblePd.PubSub,
+  live_view: [signing_salt: "En5B+uCd"]
 
 # Configures the mailer
 #
@@ -24,7 +21,7 @@ config :ansible_phoenix, AnsiblePhoenixWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :ansible_phoenix, AnsiblePhoenix.Mailer, adapter: Swoosh.Adapters.Local
+config :ansible_pd, AnsiblePd.Mailer, adapter: Swoosh.Adapters.Local
 
 # Swoosh API client is needed for adapters other than SMTP.
 config :swoosh, :api_client, false
