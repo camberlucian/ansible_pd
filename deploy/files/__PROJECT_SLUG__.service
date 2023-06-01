@@ -1,0 +1,18 @@
+[Unit]
+Description=__PROJECT_NAME__ Application
+After=network.target
+
+[Service]
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/apps/__PROJECT_SLUG__/current
+Environment=LANG=en_US.UTF-8
+EnvironmentFile=/etc/__PROJECT_SLUG__.env
+ExecStart=/home/deploy/apps/__PROJECT_SLUG__/current/bin/__PROJECT_SLUG__ start
+SyslogIdentifier=__PROJECT_SLUG__
+RemainAfterExit=no
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

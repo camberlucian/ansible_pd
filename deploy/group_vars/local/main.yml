@@ -1,0 +1,32 @@
+---
+release_env: local
+
+postgresql_hba_entries:
+  - { type: local, database: all, user: postgres, auth_method: peer }
+  - { type: local, database: all, user: all, auth_method: peer }
+  - { type: host, database: all, user: all, address: '127.0.0.1/32', auth_method: md5 }
+  - { type: host, database: all, user: all, address: '::1/128', auth_method: md5 }
+
+postgresql_python_library: python3-psycopg2
+
+postgresql_databases:
+  - name: {{ project_slug }}
+    owner: {{ project_slug }}
+
+postgresql_users:
+  - name: {{ project_slug }}
+    password: {{ project_slug }}
+
+security_ssh_allowed_users:
+  - root
+  - deploy
+  - vagrant
+security_sudoers_passwordless:
+  - deploy
+  - vagrant
+docker_users:
+  - deploy
+  - vagrant
+
+postgres_exporter_data_source_uri: "db_host/prometheus"
+postgres_exporter_data_source_user: "prometheus"

@@ -1,0 +1,8 @@
+---
+- name: app deploy
+  gather_facts: yes
+  hosts:
+    - '*app*'
+  serial: 1
+  roles:
+    - { role: deploy, action: "deploy" }

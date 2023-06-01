@@ -1,0 +1,29 @@
+---
+- name: Basic Ansible Setup for __PROJECT_SLUG__
+  gather_facts: yes
+  tags:
+    - default
+  hosts: all
+  roles:
+    - { role: setup, action: "defaults", tags: ["defaults"] }
+    - { role: geerlingguy.ntp, become: yes, tags: ["ntp"] }
+    - { role: geerlingguy.security, become: yes, tags: ["security"] }
+    - { role: smartlogic.github_keys, tags: ["user", "auth"] }
+    - { role: prometheus-exporters, tags: ["prometheus"], actions: ["node_exporter"] }
+
+- name: Web Setup
+  gather_facts: yes
+  hosts:
+    - '*app*'
+  roles:
+    - { role: prometheus-exporters, tags: ["prometheus"], actions: ["postgres_exporter"] }
+    - { role: setup, action: "packages", tags: ["packages", "setup"] }
+    - { role: setup, action: "app", tags: ["app", "setup"] }
+
+- name: Local DB Setup
+  gather_facts: yes
+  hosts:
+    - pg
+  roles:
+    - { role: geerlingguy.postgresql, become: yes, tags: ["postgres"] }
+    - { role: setup, action: "local_db", tags: ["postgres", "setup"] }

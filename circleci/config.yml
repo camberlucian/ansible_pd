@@ -1,0 +1,205 @@
+version: 2.1
+
+jobs:
+  setup:
+    parallelism: 1
+    docker:
+      - image: cimg/elixir:1.14.2-erlang-25.0.4-node
+        environment:
+          MIX_ENV: test
+    steps:
+      - checkout
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
+      - run: cp .circleci/env.circleci .env.test
+      - restore_cache:
+          keys:
+            - v2-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v2-mix-cache-{{ .Branch }}
+            - v2-mix-cache
+      - restore_cache:
+          keys:
+            - v2-build-cache-{{ .Branch }}
+            - v2-build-cache
+      - run: mix do deps.get, compile
+      - save_cache:
+          key: v2-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+          paths: "deps"
+      - save_cache:
+          key: v2-build-cache-{{ .Branch }}
+          paths: "_build"
+
+  lint:
+    parallelism: 1
+    docker:
+      - image: cimg/elixir:1.14.2-erlang-25.0.4-node
+        environment:
+          MIX_ENV: test
+    steps:
+      - checkout
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
+      - run: cp .circleci/env.circleci .env.test
+      - restore_cache:
+          key: v2-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+      - restore_cache:
+          key: v2-build-cache-{{ .Branch }}
+      - run: mix compile --force --warnings-as-errors
+      - run: mix deps.audit
+      - run: mix format --check-formatted
+      - run: mix credo --all --format=oneline
+
+  test:
+    parallelism: 1
+    docker:
+      - image: cimg/elixir:1.14.2-erlang-25.0.4-node
+        environment:
+          MIX_ENV: test
+      - image: postgis/postgis:12-3.0
+        environment:
+          POSTGRES_DB: __PROJECT_SLUG___test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+    steps:
+      - checkout
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
+      - run: cp .circleci/env.circleci .env.test
+      - restore_cache:
+          key: v2-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+      - restore_cache:
+          key: v2-build-cache-{{ .Branch }}
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run: mix ecto.reset
+      - run: mix test
+
+  assets:
+    parallelism: 1
+    docker:
+      - image: cimg/elixir:1.14.2-erlang-25.0.4-node
+        environment:
+          MIX_ENV: test
+    steps:
+      - checkout
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
+      - run: cp .circleci/env.circleci .env.test
+      - restore_cache:
+          key: v2-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+      - restore_cache:
+          key: v2-build-cache-{{ .Branch }}
+      - run: mix phx.digest
+
+  build-release:
+    parallelism: 1
+    docker:
+      - image: hexpm/elixir:1.14.2-erlang-25.1.2-ubuntu-jammy-20220428
+        environment:
+          MIX_ENV: prod
+    steps:
+      - checkout
+      - run: apt-get autoremove && apt autoclean
+      - run: apt-get update && apt-get install -y git build-essential
+      - run: mix local.rebar --force && mix local.hex --force
+      - restore_cache:
+          key: v2-release-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+      - restore_cache:
+          key: v2-release-cache-{{ .Branch }}
+      - run: mix deps.get --only prod && mix deps.compile
+      - save_cache:
+          key: v2-release-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+          paths: "deps"
+      - save_cache:
+          key: v2-release-cache-{{ .Branch }}
+          paths: "_build"
+      - run: mkdir artifacts && echo ${CIRCLE_SHA1} > ./artifacts/REVISION
+      - run: mix assets.deploy && mix release
+      - run: cd _build/prod/rel/__PROJECT_SLUG__/ && tar -c -z -f ../__PROJECT_SLUG__.tar.gz .
+      - run: cp _build/prod/rel/__PROJECT_SLUG__.tar.gz ./artifacts/__PROJECT_SLUG__.tar.gz
+      - persist_to_workspace:
+          root: ~/project
+          paths: artifacts
+
+  publish-github-staging-release:
+    docker:
+      - image: cibuilds/github:0.10
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: "Publish Staging Release on GitHub"
+          command: |
+            VERSION=${CIRCLE_SHA1}
+            ghr -t ${GITHUB_TOKEN} -u smartlogic -r __APP_REPO__ -c ${CIRCLE_SHA1} -draft -delete ${VERSION} ./artifacts/
+
+  publish-github-production-release:
+    docker:
+      - image: cibuilds/github:0.10
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: "Publish Production Release on GitHub"
+          command: |
+            VERSION=${CIRCLE_TAG}
+            ghr -t ${GITHUB_TOKEN} -u smartlogic -r __APP_REPO__ -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
+
+workflows:
+  test:
+    jobs:
+      - setup
+      - lint:
+          requires:
+            - setup
+      - test:
+          requires:
+            - setup
+      - assets:
+          requires:
+            - setup
+  staging-release:
+    jobs:
+      - setup:
+          filters: &staging-filters
+            branches:
+              only: main
+      - test:
+          requires:
+            - setup
+          filters:
+            <<: *staging-filters
+      - build-release:
+          requires:
+            - test
+          filters:
+            <<: *staging-filters
+      - publish-github-staging-release:
+          requires:
+            - build-release
+          filters:
+            <<: *staging-filters
+  production-release:
+    jobs:
+      - setup:
+          filters: &production-filters
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^\d{4}-\d{1,2}-\d{1,2}(\.\d+)$/
+      - test:
+          requires:
+            - setup
+          filters:
+            <<: *production-filters
+      - build-release:
+          requires:
+            - test
+          filters:
+            <<: *production-filters
+      - publish-github-production-release:
+          requires:
+            - build-release
+          filters:
+            <<: *production-filters

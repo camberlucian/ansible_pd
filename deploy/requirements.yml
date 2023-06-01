@@ -1,0 +1,23 @@
+---
+collections:
+  - community.aws
+
+roles:
+  - src: geerlingguy.security
+    version: 2.2.0
+  - src: geerlingguy.ntp
+    version: 2.3.1
+  - src: geerlingguy.postgresql
+    version: 3.4.3
+  - src: geerlingguy.nodejs
+    version: 6.1.1
+  - src: geerlingguy.docker
+    version: 6.1.0
+  - src: smartlogic.github_keys
+    version: 2.0.1
+  - src: https://github.com/smartlogic/ansible-role-prometheus-exporters
+    name: prometheus-exporters
+    version: 1.0.0
+  - src: git+git@github.com:smartlogic/ansible-role-traefik
+    name: traefik
+    version: 1.0.0

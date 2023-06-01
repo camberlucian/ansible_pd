@@ -1,0 +1,51 @@
+---
+- name: make {{ project_slug }} directory
+  file:
+    dest: {{ app_path }}
+    state: directory
+    owner: {{ deployer }}
+    group: {{ deployer }}
+  become: yes
+
+- name: make current directory
+  file:
+    dest: {{ current_release_path }}
+    state: directory
+    owner: {{ deployer }}
+    group: {{ deployer }}
+  become: yes
+
+- name: make releases directory
+  file:
+    dest: {{ releases_path }}
+    state: directory
+    owner: {{ deployer }}
+    group: {{ deployer }}
+  become: yes
+
+- name: make shared directory
+  file:
+    dest: {{ shared_path }}
+    state: directory
+    owner: {{ deployer }}
+    group: {{ deployer }}
+  become: yes
+
+- name: copy systemd file
+  copy:
+    src: "{{ app_service_file }}"
+    dest: /etc/systemd/system/{{ project_slug }}.service
+  become: yes
+  notify: reload systemd
+
+- name: copy config file
+  template:
+    src: "{{ vapor_file }}"
+    dest: /etc/{{ project_slug }}.env
+  become: yes
+
+- name: enable {{ project_slug }} service
+  systemd:
+    name: {{ project_slug }}.service
+    enabled: yes
+  become: yes

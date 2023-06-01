@@ -43,9 +43,10 @@
                         'Elixir.Swoosh.Email.Recipient.BitString',
                         'Elixir.Swoosh.Email.Recipient.Tuple',
                         'Elixir.Swoosh.Email.Render','Elixir.Swoosh.Mailer',
-                        'Elixir.Swoosh.TestAssertions']},
+                        'Elixir.Swoosh.TestAssertions',
+                        'Elixir.Swoosh.X.TestAssertions']},
               {registered,[]},
-              {vsn,"1.10.0"},
+              {vsn,"1.11.0"},
               {mod,{'Elixir.Swoosh.Application',[]}},
               {env,[{json_library,'Elixir.Jason'},
                     {api_client,'Elixir.Swoosh.ApiClient.Hackney'}]}]}.

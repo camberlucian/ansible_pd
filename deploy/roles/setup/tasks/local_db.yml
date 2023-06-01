@@ -1,0 +1,9 @@
+---
+- name: Ensure we have our own comment added to /etc/services
+  ansible.builtin.lineinfile:
+    path: /etc/postgresql/14/main/postgresql.conf
+    regexp: "^listen_addresses = "
+    insertbefore: "^#listen_addresses = "
+    line: "listen_addresses = '*'"
+  become: yes
+  notify: restart postgresql

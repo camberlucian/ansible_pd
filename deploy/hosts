@@ -1,0 +1,11 @@
+[local]
+app1 ansible_host=127.0.0.1 ansible_port=2222 ansible_user=vagrant ansible_ssh_extra_args='-o StrictHostKeyChecking=no -o PasswordAuthentication=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o IdentityFile=./.vagrant/machines/web/virtualbox/private_key'
+pg ansible_host=127.0.0.1 ansible_port=2244 ansible_user=vagrant ansible_ssh_extra_args='-o StrictHostKeyChecking=no -o PasswordAuthentication=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o IdentityFile=./.vagrant/machines/postgres/virtualbox/private_key'
+
+[staging]
+staging_app1 ansible_host=0.0.0.0 ansible_user=ubuntu
+staging_app2 ansible_host=0.0.0.0 ansible_user=ubuntu
+
+[production]
+production_app1 ansible_host=0.0.0.0 ansible_user=ubuntu
+production_app2 ansible_host=0.0.0.0 ansible_user=ubuntu

@@ -1,0 +1,12 @@
+---
+- include_tasks: defaults.yml
+  when: action == "defaults"
+
+- include_tasks: app.yml
+  when: action == "app"
+
+- include_tasks: packages.yml
+  when: action == "packages"
+
+- include_tasks: local_db.yml
+  when: action == "local_db"

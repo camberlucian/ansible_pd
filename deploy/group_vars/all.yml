@@ -1,0 +1,57 @@
+---
+sentry_organization_slug: smartlogic
+sentry_project_slug: __PROJECT_SENTRY_SLUG__
+slack_channel: "#__PROJECT_INTERNAL_SLACK_CHANNEL_HANDLE__"
+
+project_slug: __PROJECT_SLUG__
+# Update release task with real app module name
+project_release_task: "APPMODULENAME.ReleaseTasks.Migrate.run()"
+
+aws_region: us-east-1
+elb_app_target_group: __PROJECT_ELB_TARGET_GROUP__
+
+traefik_version: 2.9.8
+traefik_checksum: 3ea5332c28980aaf8b7d0958379a62e77b4259efb2dac4cce733c8eb67b4ebe6
+traefik_config: "{{ playbook_dir }}/files/{{ release_env }}/traefik.toml"
+traefik_config_files:
+  - "{{ playbook_dir }}/files/{{ release_env }}/traefik-proxy.toml"
+
+vapor_file: "{{ playbook_dir }}/files/{{ release_env }}/{{ project_slug }}.env.j2"
+
+github_keys_install_user: deploy
+github_keys_create_install_user: true
+github_keys_github_orgs:
+  - smartlogic
+
+security_ssh_port: 22
+security_ssh_password_authentication: "no"
+security_ssh_permit_root_login: "yes"
+security_ssh_usedns: "no"
+security_ssh_permit_empty_password: "no"
+security_ssh_challenge_response_auth: "no"
+security_ssh_gss_api_authentication: "no"
+security_ssh_x11_forwarding: "no"
+security_sshd_state: started
+security_ssh_restart_handler_state: restarted
+security_ssh_allowed_users:
+  - root
+  - deploy
+security_ssh_allowed_groups: []
+
+security_sudoers_passwordless:
+  - deploy
+security_sudoers_passworded: []
+
+security_autoupdate_enabled: true
+security_autoupdate_blacklist: []
+
+# Autoupdate mail settings used on Debian/Ubuntu only.
+security_autoupdate_reboot: "false"
+security_autoupdate_reboot_time: "03:00"
+security_autoupdate_mail_to: ""
+security_autoupdate_mail_on_error: false
+
+security_fail2ban_enabled: false
+security_fail2ban_custom_configuration_template: "jail.local.j2"
+
+app_service_file: "{{ playbook_dir }}/files/{{ project_slug }}.service"

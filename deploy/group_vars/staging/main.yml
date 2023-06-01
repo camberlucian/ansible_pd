@@ -1,0 +1,16 @@
+---
+release_env: staging
+
+security_ssh_allowed_users:
+  - root
+  - ubuntu
+  - deploy
+security_sudoers_passwordless:
+  - ubuntu
+  - deploy
+docker_users:
+  - deploy
+  - ubuntu
+
+postgres_exporter_data_source_user: postgres_exporter
+ansible_elb_access_key: __AWS_ACCESS_KEY_FOR_ELB_ACCESS__

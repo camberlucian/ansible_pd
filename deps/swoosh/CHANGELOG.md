@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.11.0
+
+### ✨ Features
+
+- Add experimental new test assertion module @jakub-gonet (#747)
+
+## 1.10.3
+
+### 🐛 Bug Fixes
+
+#### SMTP
+
+- Fix inline attachment showing up twice as both inline and attachment @Hermanverschooten (#769)
+
+
+## 1.10.2
+
+### 🐛 Bug Fixes
+
+- Corrects typo in ex\_aws\_amazon\_ses.ex @paynegreen (#766)
+
+## 1.10.1
+
+### ✨ Features
+
+- Allow Regexp assertions for subjects @aronisstav (#764)
+
+### 🧰 Maintenance
+
+- Bump finch from 0.15.0 to 0.16.0 @dependabot (#762)
+
 ## 1.10.0
 
 ### ✨ Features

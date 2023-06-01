@@ -1,0 +1,1 @@
+postgres_exporter_data_source_uri: app.account.us-east-2.rds.amazonaws.com/postgres

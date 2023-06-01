@@ -1,0 +1,98 @@
+---
+- name: "Wait for release"
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  local_action: command {{ playbook_dir }}/../bin/wait_for_ci.sh {{ release_env }}
+  register: wait_for_app_release
+  async: 600
+  poll: 30
+  ignore_errors: true
+
+- name: "Check for release results"
+  fail:
+    msg: "Release not found in GitHub, waiting for CI timed out"
+  when: wait_for_app_release.failed
+
+- name: "Download release"
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  local_action: command {{ playbook_dir }}/../bin/release.sh {{ release_env }}
+
+- name: copy config file
+  template:
+    src: "{{ vapor_file }}"
+    dest: /etc/{{ project_slug }}.env
+  become: yes
+
+- name: "Deployer tmp folder"
+  file:
+    path: "/home/{{ deployer }}/tmp"
+    owner: "{{ deployer }}"
+    group: "{{ deployer }}"
+    state: directory
+  become: true
+
+- name: "Copy archive to server"
+  copy:
+    src: "{{ playbook_dir }}/tmp/{{ project_slug }}.tar.gz"
+    dest: "/home/{{ deployer }}/tmp/{{ project_slug }}.tar.gz"
+    owner: "{{ deployer }}"
+    group: "{{ deployer }}"
+  become: true
+
+- name: ensure release directory
+  file:
+    path: "{{ release_path }}"
+    state: directory
+    owner: "{{ deployer }}"
+    group: "{{ deployer }}"
+  become: true
+
+- name: unarchive to working directory
+  unarchive:
+    src: "/home/{{ deployer }}/tmp/{{ project_slug }}.tar.gz"
+    dest: "{{ release_path }}"
+    owner: "{{ deployer }}"
+    group: "{{ deployer }}"
+    remote_src: true
+  become: true
+
+- name: "Copy REVISION to server"
+  copy:
+    src: "{{ playbook_dir }}/tmp/REVISION"
+    dest: "{{ release_path }}"
+    owner: "{{ deployer }}"
+    group: "{{ deployer }}"
+  become: true
+
+- name: register REVISION
+  ansible.builtin.slurp:
+    src: "{{ release_path }}/REVISION"
+  become: true
+  become_user: "{{ deployer }}"
+  register: deploy_revision
+
+- name: run migrations
+  shell: "export $(cat /etc/{{ project_slug }}.env | xargs) && {{ release_path }}/bin/{{ project_slug }} eval \"{{ project_release_task }}\""
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  become: true
+  become_user: "{{ deployer }}"
+
+- name: symlink to current
+  file:
+    path: "{{ current_release_path }}"
+    src: "{{ release_path }}"
+    owner: "{{ deployer }}"
+    group: "{{ deployer }}"
+    state: "link"
+    force: yes
+  notify: "restart {{ project_slug }}"
+  become: true
+
+- include_tasks: sentry.yml
+  when:
+    - sentry_organization_slug is defined
+    - inventory_hostname == (ansible_play_hosts_all | last)
+
+- include_tasks: slack.yml
+  when:
+    - slack_token is defined
+    - inventory_hostname == (ansible_play_hosts_all | last)

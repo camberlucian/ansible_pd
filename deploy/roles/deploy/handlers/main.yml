@@ -1,0 +1,4 @@
+---
+- name: restart {{ project_slug }}
+  command: systemctl restart {{ project_slug }}
+  become: true

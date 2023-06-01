@@ -1,0 +1,7 @@
+---
+- name: Notify Slack of Deploy
+  community.general.slack:
+    token: '{{ slack_token }}'
+    msg: "{{ lookup('env', 'USER') }} deployed to {{ release_env }}"
+    channel: '{{ slack_channel }}'
+  delegate_to: localhost

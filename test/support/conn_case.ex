@@ -1,4 +1,4 @@
-defmodule AnsiblePdWeb.ConnCase do
+defmodule AnsiblepdWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -11,7 +11,7 @@ defmodule AnsiblePdWeb.ConnCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use AnsiblePdWeb.ConnCase, async: true`, although
+  by setting `use AnsiblepdWeb.ConnCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -22,16 +22,17 @@ defmodule AnsiblePdWeb.ConnCase do
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
-      import AnsiblePdWeb.ConnCase
+      import AnsiblepdWeb.ConnCase
 
-      alias AnsiblePdWeb.Router.Helpers, as: Routes
+      alias AnsiblepdWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
-      @endpoint AnsiblePdWeb.Endpoint
+      @endpoint AnsiblepdWeb.Endpoint
     end
   end
 
-  setup _tags do
+  setup tags do
+    Ansiblepd.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end
